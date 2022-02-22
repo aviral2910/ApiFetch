@@ -1,52 +1,102 @@
-import "node-fetch";
-import fetch from "node-fetch";
+// import "node-fetch";
+// import fetch from "node-fetch";
 
-async function addMessage() {
+const axios = require('axios');
+
+async function getMessage() {
   const contractAddress = "0x3b417faee9d2ff636701100891dc2755b5321cc3";
+
   var url = `https://deep-index.moralis.io/api/v2/${contractAddress}/nft?chain=eth&format=decimal`;
-  const params = {
+  const headerParam = {
     headers: {
-      "x-api-key":
-        "E8KUUv2L8gY2DMTSimYzBPkWzhSBuASBygmSN1Qr7BK8YqDCYJ3RlVzvBGIuFZGW",
+      "x-api-key": "E8KUUv2L8gY2DMTSimYzBPkWzhSBuASBygmSN1Qr7BK8YqDCYJ3RlVzvBGIuFZGW",
       accept: "application/json",
     },
   };
-  var List = ['Empty'];
-  const FinalData = await fetch(url, params)
-    .then((res) => {
-      return res.json();
-    })
-    .then((data) => {
-      for (var key in data["result"]) {
-        const token_uri = data["result"][key]["token_uri"];
-        if (token_uri != null) {
-          fetch(token_uri)
-            .then((resIn) => {
-              if (!resIn.ok) {
-                throw new Error("Some Network Error Occured");
-              }
-              return resIn.json();
-            })
-            .then((dataIn) => {
-              if (dataIn.name != null && dataIn.image != null){
-               List.push(dataIn.name);
-           //   console.log(List.at(1))
-              }
-            })
-            .catch((error) => {
-            });
-        }
+
+  var items = [];
+
+  let axiosClient = axios.create({});
+
+  try {
+    const response = await axiosClient.get(url, headerParam);
+
+    const results = response.data.result;
+
+    for (let i = 0; i < results.length; i++) {
+      if (results[i]['token_uri'] == null) {
+        return;
       }
-      
-    })
-    // .then((listdata) => {
-    //   console.log(listdata);
-    // })
-    // ;
-console.log(FinalData);
+
+
+      const metaResponse = await axiosClient.get(results[i]['token_uri']);
+
+      const metaList = metaResponse.data;
+
+      if (metaList.name == null && metaList.image == null) {
+        return;
+      }
+
+      items.push(metaList.name);
+    }
+
+  } catch (error) {
+    console.log(error)
+  }
+
+  console.log(items);
+
+  // console.log();
 }
 
-addMessage();
+getMessage();
+
+// async function addMessage() {
+//   const contractAddress = "0x3b417faee9d2ff636701100891dc2755b5321cc3";
+//   var url = `https://deep-index.moralis.io/api/v2/${contractAddress}/nft?chain=eth&format=decimal`;
+//   const params = {
+//     headers: {
+//       "x-api-key":
+//         "E8KUUv2L8gY2DMTSimYzBPkWzhSBuASBygmSN1Qr7BK8YqDCYJ3RlVzvBGIuFZGW",
+//       accept: "application/json",
+//     },
+//   };
+//   var List = ['Empty'];
+//   const FinalData = await fetch(url, params)
+//     .then((res) => {
+//       return res.json();
+//     })
+//     .then((data) => {
+//       for (var key in data["result"]) {
+//         const token_uri = data["result"][key]["token_uri"];
+//         if (token_uri != null) {
+//           fetch(token_uri)
+//             .then((resIn) => {
+//               if (!resIn.ok) {
+//                 throw new Error("Some Network Error Occured");
+//               }
+//               return resIn.json();
+//             })
+//             .then((dataIn) => {
+//               if (dataIn.name != null && dataIn.image != null){
+//                List.push(dataIn.name);
+//            //   console.log(List.at(1))
+//               }
+//             })
+//             .catch((error) => {
+//             });
+//         }
+//       }
+
+//     })
+//     // .then((listdata) => {
+//     //   console.log(listdata);
+//     // })
+//     // ;
+// console.log(FinalData);
+// }
+
+// addMessage();
 
 
 
