@@ -33,7 +33,7 @@ async function getMessage() {
 
       const metaList = metaResponse.data;
 
-      if (metaList.name == null && metaList.image == null) {
+      if (metaList.name == null || metaList.image == null) {
         return;
       }
 
